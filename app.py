@@ -1,35 +1,18 @@
 import json
-import re
 import numpy as np
 import streamlit as st
 from collections import Counter
 from src.db_manager import get_connection
 from src.config import DATA_DIR
 
-st.set_page_config(
-    page_title="Dota Draft Advisor", 
-    page_icon="🛡️", 
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+st.set_page_config(page_title="Dota Draft Advisor", page_icon="🛡️", layout="wide", initial_sidebar_state="collapsed")
 
 st.markdown("""
 <style>
-    div[data-testid="stVerticalBlockBorderWrapper"] {
-        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-    }
-    div[data-testid="stVerticalBlockBorderWrapper"]:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 20px rgba(214, 54, 50, 0.25) !important;
-        border-color: #d63632 !important;
-    }
-    div[data-testid="stMetricValue"] {
-        font-size: 2rem !important;
-        font-weight: 800 !important;
-    }
-    .block-container {
-        padding-top: 2rem !important;
-    }
+    div[data-testid="stVerticalBlockBorderWrapper"] { transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; }
+    div[data-testid="stVerticalBlockBorderWrapper"]:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(214, 54, 50, 0.25) !important; border-color: #d63632 !important; }
+    div[data-testid="stMetricValue"] { font-size: 2rem !important; font-weight: 800 !important; }
+    .block-container { padding-top: 2rem !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -56,60 +39,9 @@ else:
 own_pool_rows = cur.fetchall()
 own_pool_heroes = {h["name"]: h["hero_id"] for h in own_pool_rows}
 
-tab1, tab2, tab3, tab4 = st.tabs([
-    "⚔️ Simulador de Draft",
-    "🎯 Explorador Individual", 
-    "📋 Top 5 Global", 
-    "📈 Meta Stats"
-])
+tab1, tab2, tab3, tab4 = st.tabs(["⚔️ Simulador de Draft", "🎯 Explorador Individual", "📋 Top 5 Global", "📈 Meta Stats"])
 
-# ==========================================
-# 🛠️ MOTOR DE VOLATILIDAD REFORZADO
-# ==========================================
-def calcular_indice_volatilidad(razon_text):
-    """Extrae las simulaciones saltándose cualquier alerta vieja en la BD"""
-    if not razon_text:
-        return 0.0, "Desconocida", "white", "⚪", ""
-        
-    sim_scores = []
-    
-    # 1. Limpieza Agresiva: Borrar cualquier mención vieja de alerta
-    texto_limpio = re.sub(r'⚠️\s*ALERTA DE VOLATILIDAD.*?(?=\n|$)', '', str(razon_text), flags=re.IGNORECASE)
-    
-    # 2. Extracción blindada de números
-    lines = texto_limpio.split('\n')
-    for line in lines:
-        if "Simulación" in line or "Midgame:" in line:
-            valores = re.findall(r"[-+]?(?:\d*\.*\d+)", line) # Agarra cualquier número (positivo o negativo)
-            if len(valores) >= 2: # Esperamos al menos midgame y lategame
-                try:
-                    promedio_sim = np.mean([float(v) for v in valores[-2:]]) # Tomamos los últimos 2 números por si acaso
-                    sim_scores.append(promedio_sim)
-                except ValueError:
-                    pass
-
-    texto_final = "\n".join([line for line in lines if "ALERTA" not in line]).strip()
-    
-    if len(sim_scores) > 1:
-        sigma = np.std(sim_scores)
-        score_out = round(sigma, 2)
-        
-        if sigma < 1.0:
-            return score_out, "Estable", "green", "🟢", texto_final
-        elif sigma < 2.2:
-            return score_out, "Moderada", "yellow", "🟡", texto_final
-        elif sigma < 3.5:
-            return score_out, "Alta", "orange", "🟠", texto_final
-        else:
-            return score_out, "Extrema", "red", "🔴", texto_final
-            
-    return 0.0, "N/A", "white", "⚪", texto_final
-
-EXCLUSIVE_ITEM_GROUPS = [
-    {"item_boots", "item_phase_boots", "item_power_treads", "item_arcane_boots", "item_tranquil_boots", "item_boots_of_travel", "item_boots_of_travel_2", "item_guardian_greaves",
-     "boots", "phase_boots", "power_treads", "arcane_boots", "tranquil_boots", "boots_of_travel", "boots_of_travel_2", "guardian_greaves"}
-]
-
+EXCLUSIVE_ITEM_GROUPS = [{"item_boots", "item_phase_boots", "item_power_treads", "item_arcane_boots", "item_tranquil_boots", "item_boots_of_travel", "item_boots_of_travel_2", "item_guardian_greaves", "boots", "phase_boots", "power_treads", "arcane_boots", "tranquil_boots", "boots_of_travel", "boots_of_travel_2", "guardian_greaves"}]
 UPGRADE_FAMILIES = [
     {"base": ["item_basher", "basher", "item_skull_basher", "skull_basher"], "upgrades": ["item_abyssal_blade", "abyssal_blade"]},
     {"base": ["item_blink", "blink", "item_blink_dagger", "blink_dagger"], "upgrades": ["item_swift_blink", "swift_blink", "item_overwhelming_blink", "overwhelming_blink", "item_arcane_blink", "arcane_blink"]},
@@ -124,35 +56,27 @@ UPGRADE_FAMILIES = [
     {"base": ["item_orchid", "orchid", "item_orchid_malevolence", "orchid_malevolence"], "upgrades": ["item_bloodthorn", "bloodthorn"]},
     {"base": ["item_vanguard", "vanguard"], "upgrades": ["item_crimson_guard", "crimson_guard", "item_abyssal_blade", "abyssal_blade"]}
 ]
+SKIP_ITEMS = {"item_boots", "boots", "item_phase_boots", "phase_boots", "item_power_treads", "power_treads", "item_arcane_boots", "arcane_boots", "item_tranquil_boots", "tranquil_boots", "item_magic_wand", "magic_wand", "item_bracer", "bracer", "item_wraith_band", "wraith_band", "item_null_talisman", "null_talisman"}
 
-SKIP_ITEMS = {
-    "item_boots", "boots", "item_phase_boots", "phase_boots", "item_power_treads", "power_treads", 
-    "item_arcane_boots", "arcane_boots", "item_tranquil_boots", "tranquil_boots", "item_magic_wand", "magic_wand",
-    "item_bracer", "bracer", "item_wraith_band", "wraith_band", "item_null_talisman", "null_talisman"
-}
+def get_volatility_badge(sigma):
+    """Devuelve el diseño del badge según el valor matemático precalculado en la BD"""
+    if sigma < 1.0: return "Estable", "green", "🟢"
+    elif sigma < 2.2: return "Moderada", "yellow", "🟡"
+    elif sigma < 3.5: return "Alta", "orange", "🟠"
+    else: return "Extrema", "red", "🔴"
 
-# ==========================================
-# PESTAÑA 1: SIMULADOR DRAFT
-# ==========================================
 with tab1:
     st.markdown("### 🧠 Analizador de Enemigos en Vivo")
-    st.caption("Selecciona el draft enemigo a medida que avanza la partida para calcular tu mejor pick.")
-    
     with st.container(border=True):
         cols = st.columns(5)
         selected_enemies_draft = []
-        
         for i in range(5):
             with cols[i]:
                 e_pos = st.selectbox(f"Posición {i+1}", ["pos1", "pos2", "pos3", "pos4", "pos5"], key=f"draft_pos_{i}")
-                cur.execute("""
-                    SELECT h.hero_id, h.name FROM heroes h JOIN hero_positions hp ON h.hero_id = hp.hero_id
-                    WHERE hp.position = ? AND hp.is_own_pool = 0 ORDER BY h.name
-                """, (e_pos,))
+                cur.execute("SELECT h.hero_id, h.name FROM heroes h JOIN hero_positions hp ON h.hero_id = hp.hero_id WHERE hp.position = ? AND hp.is_own_pool = 0 ORDER BY h.name", (e_pos,))
                 position_enemies = {h["name"]: h["hero_id"] for h in cur.fetchall()}
                 e_name = st.selectbox(f"Enemigo {i+1}", ["-- Seleccionar --"] + list(position_enemies.keys()), key=f"draft_hero_{i}")
-                if e_name != "-- Seleccionar --":
-                    selected_enemies_draft.append({"hero_id": position_enemies[e_name], "name": e_name, "position": e_pos})
+                if e_name != "-- Seleccionar --": selected_enemies_draft.append({"hero_id": position_enemies[e_name], "name": e_name, "position": e_pos})
 
     if selected_enemies_draft:
         st.write("") 
@@ -163,8 +87,9 @@ with tab1:
                 total_score = 0.0
                 matchup_details = []
                 for enemy in selected_enemies_draft:
+                    # AHORA LEEMOS LOS NUEVOS CAMPOS DESDE LA BASE DE DATOS
                     cur.execute("""
-                        SELECT score_laning, score_midgame, score_lategame, razon, recommended_items
+                        SELECT score_laning, score_midgame, score_lategame, recommended_items, volatility_score
                         FROM matchups WHERE own_hero_id = ? AND enemy_hero_id = ? AND enemy_position = ?
                     """, (own_id, enemy["hero_id"], enemy["position"]))
                     row = cur.fetchone()
@@ -173,13 +98,10 @@ with tab1:
                         global_score = (row["score_midgame"] + row["score_lategame"]) / 2.0 if is_pos1 else (row["score_laning"] + row["score_midgame"] + row["score_lategame"]) / 3.0
                         total_score += global_score
                         
-                        sigma, lvl, color, icon, clean_razon = calcular_indice_volatilidad(row["razon"])
-                        
                         matchup_details.append({
                             "enemy_name": enemy["name"], "position": enemy["position"], "score_global": global_score,
                             "score_laning": row["score_laning"], "score_midgame": row["score_midgame"], "score_lategame": row["score_lategame"],
-                            "sigma": sigma, "vol_lvl": lvl, "vol_color": color, "vol_icon": icon,
-                            "items": json.loads(row["recommended_items"] or "[]")
+                            "sigma": row.get("volatility_score", 0.0), "items": json.loads(row["recommended_items"] or "[]")
                         })
                 
                 if matchup_details:
@@ -189,7 +111,6 @@ with tab1:
             if hero_totals:
                 st.markdown("## 🏆 Recomendaciones del Sistema")
                 rec_cols = st.columns(min(3, len(hero_totals)))
-                
                 for idx, rec in enumerate(hero_totals[:3]):
                     with rec_cols[idx]:
                         with st.container(border=True):
@@ -199,8 +120,13 @@ with tab1:
                             with st.expander("📊 Ver desglose de puntajes"):
                                 for det in rec["details"]:
                                     l_str = "N/A" if det['score_laning'] is None else f"{det['score_laning']:+.1f}"
-                                    vol_str = f" | {det['vol_icon']} Volatilidad: :{det['vol_color']}[{det['vol_lvl']} (σ: {det['sigma']})]" if det['sigma'] >= 1.0 else ""
                                     
+                                    # Generar badge visual
+                                    vol_str = ""
+                                    if det['sigma'] >= 1.0:
+                                        lvl, color, icon = get_volatility_badge(det['sigma'])
+                                        vol_str = f" | {icon} Volatilidad: :{color}[{lvl} (σ: {det['sigma']})]"
+                                        
                                     st.markdown(f"**vs {det['enemy_name']}** -> Global: `{det['score_global']:.1f}`{vol_str}")
                                     st.caption(f"L: {l_str} | M: {det['score_midgame']:+.1f} | L: {det['score_lategame']:+.1f}")
                                     st.markdown("---")
@@ -227,24 +153,19 @@ with tab1:
                                     items_ordenados = sorted(item_weights.items(), key=lambda x: x[1], reverse=True)
                                     build_final = []
                                     grupos_usados = set()
-                                    
                                     for i_id, peso in items_ordenados:
                                         if i_id in SKIP_ITEMS: continue
                                         if len(build_final) >= 6: break
                                         conflicto = False
                                         grupo_index = -1
-                                        
                                         for idx_g, grupo in enumerate(EXCLUSIVE_ITEM_GROUPS):
                                             if i_id in grupo:
                                                 grupo_index = idx_g
-                                                if idx_g in grupos_usados:
-                                                    conflicto = True
+                                                if idx_g in grupos_usados: conflicto = True
                                                 break
-                                                
                                         if not conflicto:
                                             build_final.append((i_id, peso))
-                                            if grupo_index != -1:
-                                                grupos_usados.add(grupo_index)
+                                            if grupo_index != -1: grupos_usados.add(grupo_index)
 
                                     if build_final:
                                         max_peso = build_final[0][1]
@@ -258,12 +179,7 @@ with tab1:
                                         st.info("Sin items recomendados tras aplicar filtros.")
                                 else:
                                     st.info("Sin items registrados.")
-    else:
-        st.info("💡 Consejo: Selecciona al menos un héroe enemigo para calcular.")
 
-# ==========================================
-# PESTAÑA 2: EXPLORADOR
-# ==========================================
 with tab2:
     st.markdown("### 🔎 Buscar Matchup Específico")
     if not own_pool_heroes:
@@ -276,8 +192,9 @@ with tab2:
             
         selected_hero_id = own_pool_heroes[selected_hero_name]
         
+        # AHORA LEEMOS LOS NUEVOS CAMPOS DESDE LA BASE DE DATOS
         cur.execute("""
-            SELECT e.name as enemy_name, m.score_laning, m.score_midgame, m.score_lategame, m.analisis_mecanico_previo, m.razon, m.recommended_items
+            SELECT e.name as enemy_name, m.score_laning, m.score_midgame, m.score_lategame, m.analisis_mecanico_previo, m.clean_razon, m.recommended_items, m.volatility_score
             FROM matchups m JOIN heroes e ON m.enemy_hero_id = e.hero_id
             WHERE m.own_hero_id = ? AND m.enemy_position = ?
             ORDER BY CASE WHEN m.score_laning IS NULL THEN (m.score_midgame + m.score_lategame) / 2.0
@@ -291,8 +208,7 @@ with tab2:
                 is_pos1 = r["score_laning"] is None
                 score_global = (r["score_midgame"] + r["score_lategame"]) / 2.0 if is_pos1 else (r["score_laning"] + r["score_midgame"] + r["score_lategame"]) / 3.0
                 laning_str = "N/A" if is_pos1 else f"{r['score_laning']:+.1f}"
-                
-                sigma, lvl, color, icon, clean_razon = calcular_indice_volatilidad(r["razon"])
+                sigma = r.get("volatility_score", 0.0)
                 
                 with st.container(border=True):
                     c_h, c_s, c_f = st.columns([2, 1, 2])
@@ -302,10 +218,11 @@ with tab2:
                     
                     with st.expander("Ver Justificación de la IA"): 
                         if sigma >= 1.0:
+                            lvl, color, icon = get_volatility_badge(sigma)
                             st.markdown(f"**Índice de Volatilidad:** {icon} :{color}[{lvl}] *(Score Matemático de Dispersión: {sigma})*")
                             
                         st.caption(r["analisis_mecanico_previo"])
-                        st.markdown(clean_razon, unsafe_allow_html=True)
+                        st.markdown(r["clean_razon"], unsafe_allow_html=True) # Imprimimos el texto purificado
                         
                         items_crudos = json.loads(r["recommended_items"] or "[]")
                         if items_crudos:
@@ -315,31 +232,20 @@ with tab2:
         else:
             st.info("No hay datos generados para este cruce específico.")
 
-# ==========================================
-# PESTAÑA 3 & 4: TOP 5 y META
-# ==========================================
 with tab3:
     st.markdown("### 👑 Fuerza Global de tu Pool")
     if len(own_pool_rows) >= 5:
         heroes_list = [{"id": h["hero_id"], "name": h["name"]} for h in own_pool_rows]
         matchup_data = {}
         for h in heroes_list:
-            cur.execute("""
-                SELECT enemy_hero_id,
-                CASE WHEN score_laning IS NULL THEN (score_midgame + score_lategame) / 2.0
-                ELSE (score_laning + score_midgame + score_lategame) / 3.0 END as score_global
-                FROM matchups WHERE own_hero_id = ?
-            """, (h["id"],))
+            cur.execute("SELECT enemy_hero_id, CASE WHEN score_laning IS NULL THEN (score_midgame + score_lategame) / 2.0 ELSE (score_laning + score_midgame + score_lategame) / 3.0 END as score_global FROM matchups WHERE own_hero_id = ?", (h["id"],))
             matchup_data[h["id"]] = {row["enemy_hero_id"]: row["score_global"] for row in cur.fetchall()}
-            
         hero_global_averages = [{"id": h["id"], "name": h["name"], "promedio": float(np.mean(list(matchup_data[h["id"]].values())) if matchup_data[h["id"]] else -999)} for h in heroes_list]
         hero_global_averages.sort(key=lambda x: x["promedio"], reverse=True)
-        
         cols = st.columns(5)
         for idx, hero in enumerate(hero_global_averages[:5]):
             with cols[idx]:
-                with st.container(border=True): 
-                    st.metric(f"#{idx+1} {hero['name']}", f"{hero['promedio']:.2f}")
+                with st.container(border=True): st.metric(f"#{idx+1} {hero['name']}", f"{hero['promedio']:.2f}")
 
 with tab4:
     st.markdown("### 📊 Tableros de Riesgo")
@@ -347,20 +253,13 @@ with tab4:
     with col_t1:
         with st.container(border=True):
             st.markdown("#### 🥇 Rendimiento General")
-            cur.execute("""
-                SELECT h.name as "Héroe", AVG(CASE WHEN m.score_laning IS NULL THEN (m.score_midgame + m.score_lategame) / 2.0 ELSE (m.score_laning + m.score_midgame + m.score_lategame) / 3.0 END) as Promedio
-                FROM heroes h JOIN matchups m ON h.hero_id = m.own_hero_id WHERE h.is_own_pool = 1 GROUP BY h.hero_id, h.name ORDER BY Promedio DESC
-            """)
+            cur.execute("SELECT h.name as 'Héroe', AVG(CASE WHEN m.score_laning IS NULL THEN (m.score_midgame + m.score_lategame) / 2.0 ELSE (m.score_laning + m.score_midgame + m.score_lategame) / 3.0 END) as Promedio FROM heroes h JOIN matchups m ON h.hero_id = m.own_hero_id WHERE h.is_own_pool = 1 GROUP BY h.hero_id, h.name ORDER BY Promedio DESC")
             datos_pool = cur.fetchall()
             if datos_pool: st.dataframe([{"Héroe": f["Héroe"], "Puntaje": f"{f['Promedio']:+.2f}"} for f in datos_pool], use_container_width=True, hide_index=True)
-
     with col_t2:
         with st.container(border=True):
             st.markdown("#### 💀 Peligros del Meta (Counters)")
-            cur.execute("""
-                SELECT e.name as "Enemigo", UPPER(m.enemy_position) as "Rol", AVG(CASE WHEN m.score_laning IS NULL THEN (m.score_midgame + m.score_lategame) / 2.0 ELSE (m.score_laning + m.score_midgame + m.score_lategame) / 3.0 END) as Promedio
-                FROM matchups m JOIN heroes e ON m.enemy_hero_id = e.hero_id GROUP BY m.enemy_hero_id, e.name, m.enemy_position ORDER BY Promedio ASC
-            """)
+            cur.execute("SELECT e.name as 'Enemigo', UPPER(m.enemy_position) as 'Rol', AVG(CASE WHEN m.score_laning IS NULL THEN (m.score_midgame + m.score_lategame) / 2.0 ELSE (m.score_laning + m.score_midgame + m.score_lategame) / 3.0 END) as Promedio FROM matchups m JOIN heroes e ON m.enemy_hero_id = e.hero_id GROUP BY m.enemy_hero_id, e.name, m.enemy_position ORDER BY Promedio ASC")
             datos_enemigos = cur.fetchall()
             if datos_enemigos: st.dataframe([{"Enemigo": f["Enemigo"], "Rol": f["Rol"], "Daño Promedio": f"{f['Promedio']:+.2f}"} for f in datos_enemigos], use_container_width=True, hide_index=True)
 
