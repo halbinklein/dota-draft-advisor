@@ -1,0 +1,167 @@
+{
+  "hero_id": "faceless_void",
+  "name": "Faceless Void",
+  "role": "Posición 1 (Carry)",
+  "primary_attribute": "agi",
+  "attack_type": "Melee",
+  "base_stats": {
+    "str_base": 20,
+    "str_gain": 2.6,
+    "agi_base": 24,
+    "agi_gain": 3.3,
+    "int_base": 15,
+    "int_gain": 1.5,
+    "attack_damage_min": 58,
+    "attack_damage_max": 64,
+    "armor_lvl1": 4.0,
+    "move_speed": 300,
+    "turn_rate": 0.6,
+    "projectile_speed": 900,
+    "vision_daytime": 1800,
+    "vision_nighttime": 800,
+    "bat": 1.7,
+    "attack_speed_lvl1": 124,
+    "attack_range": 150,
+    "hp_lvl1": 560,
+    "hp_regen_lvl1": 3.00,
+    "mana_lvl1": 255,
+    "mana_regen_lvl1": 0.75
+  },
+  "defenses_lvl1": {
+    "physical_resistance_pct": 0.19,
+    "magic_resistance_pct": 0.26
+  },
+  "innate_ability": {
+    "name": "Campo de Distorsión",
+    "english_name": "Distorsion Field",
+    "behavior": "Pasiva",
+    "is_breakable": true,
+    "break_behavior": "Neutralizable por Ruptura: Sí",
+    "mechanics": {
+      "radius": 1200,
+      "trigger_range": 500,
+      "projectile_slow_pct": 0.40,
+      "notes": "Los proyectiles de ataque enemigos que tengan como objetivo a Faceless Void o a héroes aliados en un radio de 1200 se ralentizan un 40 % cuando están a una distancia de 500 unidades de su objetivo."
+    }
+  },
+  "skills": [
+    {
+      "ability_name": "Salto Temporal",
+      "english_name": "Time Walk",
+      "behavior": "Punto objetivo",
+      "damage_type": "Ninguno",
+      "bkbs_immunity_pierce": true,
+      "dispellable": false,
+      "mechanics": {
+        "cast_range": [650, 700, 750, 800],
+        "backtrack_duration_seconds": 2,
+        "cooldown_seconds": [21, 16, 11, 6],
+        "mana_cost": 40,
+        "aghanim_scepter_upgrade": {
+          "time_lock_radius": 325,
+          "reverse_time_walk": {
+            "window_seconds": 1.5,
+            "cooldown_seconds": 0.5,
+            "notes": "Añade Salto Temporal Inverso: permite regresar a la ubicación de lanzamiento previa dentro de 1.5 s tras aterrizar."
+          },
+          "notes": "Aplica un Bloqueo Temporal a todas las unidades en la zona de aterrizaje."
+        },
+        "notes": "Corre al lugar objetivo al mismo tiempo que deshace todo el daño recibido en los últimos 2 s. Faceless Void es invulnerable mientras usa Salto Temporal."
+      }
+    },
+    {
+      "ability_name": "Dilatación del Tiempo",
+      "english_name": "Time Dilation",
+      "behavior": "Sin objetivo",
+      "damage_type": "Mágico",
+      "bkbs_immunity_pierce": false,
+      "dispellable": true,
+      "dispellable_behavior": "Sí",
+      "mechanics": {
+        "radius": 700,
+        "duration_seconds": [7, 8, 9, 10],
+        "movement_slow_per_stack_pct": [0.04, 0.05, 0.06, 0.07],
+        "attack_slow_per_stack": [4, 5, 6, 7],
+        "cooldown_slow_pct": [0.30, 0.40, 0.50, 0.60],
+        "damage_per_second_per_stack": [4, 6, 8, 10],
+        "cooldown_seconds": [28, 24, 20, 16],
+        "mana_cost": 90,
+        "aghanim_shard_upgrade": {
+          "movement_slow_per_stack_pct": [0.09, 0.10, 0.11, 0.12],
+          "attack_slow_per_stack": [9, 10, 11, 12],
+          "self_bonus_per_stack_pct": [0.09, 0.10, 0.11, 0.12],
+          "notes": "Aumenta la ralentización y le proporciona a Faceless Void acumulaciones que aumentan su velocidad de movimiento y de ataque."
+        },
+        "notes": "Atrapa a los enemigos cercanos para ralentizar el avance de los tiempos de recarga de sus habilidades e inflige daño por segundo por cada acumulación."
+      }
+    },
+    {
+      "ability_name": "Bloqueo Temporal",
+      "english_name": "Time Lock",
+      "behavior": "Pasiva",
+      "is_breakable": true,
+      "break_behavior": "Neutralizable por Ruptura: Sí",
+      "mechanics": {
+        "duration_seconds": 0.5,
+        "chance_pct": [0.12, 0.16, 0.20, 0.24],
+        "bonus_damage": [18, 22, 26, 30],
+        "notes": "Añade una probabilidad de que tus ataques congelen a una unidad enemiga en el tiempo, atacándola una segunda vez. No se acumula con el Aplastacráneos."
+      }
+    },
+    {
+      "ability_name": "Cronoesfera",
+      "english_name": "Chronosphere",
+      "behavior": "Punto objetivo",
+      "damage_type": "Ninguno",
+      "bkbs_immunity_pierce": true,
+      "dispellable": false,
+      "dispellable_behavior": "No puede disiparse",
+      "mechanics": {
+        "radius": 500,
+        "duration_seconds": [3.75, 4.25, 4.75],
+        "cooldown_seconds": [155, 145, 135],
+        "mana_cost": [125, 200, 275],
+        "cast_range": 500,
+        "notes": "Crea una burbuja en el espacio-tiempo, atrapando a todas las unidades bajo su influencia y haciendo que te muevas muy rápido dentro de ella. Solo Faceless Void es inmune."
+      }
+    }
+  ],
+  "talent_tree": {
+    "level_10": {
+      "left": "+0.5 s de duración del retroceso para Salto Temporal",
+      "right": "+6 de DPS por t. de recarga para Dilatación del Tiempo"
+    },
+    "level_15": {
+      "left": "+125 de alcance para Salto Temporal",
+      "right": "+35 de daño para Bloqueo Temporal"
+    },
+    "level_20": {
+      "left": "-1 s de tiempo de recarga para Salto Temporal",
+      "right": "+80 de velocidad de ataque durante Cronoesfera"
+    },
+    "level_25": {
+      "left": "+140 de área de efecto para Cronoesfera",
+      "right": "+20 % de probabilidad de activar Retroceso"
+    }
+  },
+  "item_builds": {
+    "pos_1": {
+      "source": "dota2protracker.com, parche actual, consultado 05-08-2026",
+      "items": [
+        {"item_id": "power_treads", "pick_rate_pct": 100},
+        {"item_id": "manta_style", "pick_rate_pct": 91},
+        {"item_id": "battle_fury", "pick_rate_pct": 82},
+        {"item_id": "aghanims_scepter", "pick_rate_pct": 80},
+        {"item_id": "aghanims_shard", "pick_rate_pct": 80},
+        {"item_id": "black_king_bar", "pick_rate_pct": 73},
+        {"item_id": "eye_of_skadi", "pick_rate_pct": 42},
+        {"item_id": "monkey_king_bar", "pick_rate_pct": 27},
+        {"item_id": "wraith_band", "pick_rate_pct": 24},
+        {"item_id": "butterfly", "pick_rate_pct": 24},
+        {"item_id": "linkens_sphere", "pick_rate_pct": 18},
+        {"item_id": "maelstrom", "pick_rate_pct": 18},
+        {"item_id": "mjollnir", "pick_rate_pct": 16}
+      ]
+    }
+  }
+}

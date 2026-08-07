@@ -1,0 +1,157 @@
+{
+  "hero_id": "windranger",
+  "name": "Windranger",
+  "role": "Posición 1 (Carry) / Posición 4 (Support)",
+  "primary_attribute": "all",
+  "attack_type": "A distancia",
+  "base_stats": {
+    "str_base": 18,
+    "str_gain": 2.6,
+    "agi_base": 20,
+    "agi_gain": 2.1,
+    "int_base": 18,
+    "int_gain": 3.2,
+    "attack_damage_min": 49,
+    "attack_damage_max": 61,
+    "armor_lvl1": 3.3,
+    "move_speed": 285,
+    "attack_range": 600,
+    "hp_lvl1": 516,
+    "hp_regen_lvl1": 2.55,
+    "mana_lvl1": 291,
+    "mana_regen_lvl1": 1.15,
+    "attack_speed_lvl1": 110
+  },
+  "defenses_lvl1": {
+    "physical_resistance_pct": 0.17,
+    "magic_resistance_pct": 0.27
+  },
+  "innate_ability": {
+    "name": "Viento de Cola",
+    "english_name": "Tailwind",
+    "is_breakable": false,
+    "mechanics": {
+      "move_speed_bonus_pct": 0.35,
+      "duration_seconds": 2.5,
+      "max_move_speed": 600,
+      "notes": "Al usar una habilidad gana un 35% de velocidad de movimiento que se reduce gradualmente tras la mitad de su duración. Aumenta la velocidad máxima a 600."
+    }
+  },
+  "skills": [
+    {
+      "ability_name": "Disparo Encadenador",
+      "english_name": "Shackleshot",
+      "behavior": "Unidad objetivo",
+      "dispellable": true,
+      "mechanics": {
+        "max_stun_duration_seconds": [1.75, 2.25, 2.75, 3.25],
+        "miss_stun_duration_seconds": 0.6,
+        "search_distance_behind": 575,
+        "cooldown_seconds": [16, 14, 12, 10],
+        "mana_cost": [70, 80, 90, 100],
+        "notes": "Encadena al objetivo a un árbol u otra unidad detrás en 575 unidades. Si falla el encadenamiento, el aturdimiento se reduce a 0.6s. Es esquivable."
+      }
+    },
+    {
+      "ability_name": "Disparo Potenciado",
+      "english_name": "Powershot",
+      "behavior": "Punto objetivo / Canalizada",
+      "damage_type": "Mágico",
+      "dispellable": true,
+      "mechanics": {
+        "channel_time_seconds": 1.0,
+        "range": 3000,
+        "damage": [170, 270, 370, 470],
+        "move_slow_pct": [0.22, 0.28, 0.34, 0.40],
+        "slow_duration_seconds": 3.0,
+        "damage_reduction_per_target_pct": 0.15,
+        "cooldown_seconds": [12, 11, 10, 9],
+        "mana_cost": [90, 100, 110, 120],
+        "notes": "Canaliza hasta 1s para lanzar un disparo a 3000 de distancia. Destruye árboles a su paso y el daño disminuye un 15% por cada unidad atravesada."
+      }
+    },
+    {
+      "ability_name": "Correvientos",
+      "english_name": "Windrun",
+      "behavior": "Sin objetivo",
+      "dispellable": true,
+      "mechanics": {
+        "evasion_pct": 1.0,
+        "move_speed_bonus_pct": 0.50,
+        "duration_seconds": [3.0, 4.0, 5.0, 6.0],
+        "cooldown_seconds": [14, 13, 12, 11],
+        "mana_cost": 50,
+        "notes": "Otorga 100% de evasión contra ataques físicos y 50% de velocidad de movimiento adicional."
+      }
+    },
+    {
+      "ability_name": "Fuego Concentrado",
+      "english_name": "Focus Fire",
+      "behavior": "Unidad objetivo (Nivel 6 / Habilidad Definitiva)",
+      "dispellable": false,
+      "mechanics": {
+        "bonus_attack_speed": [350, 425, 500],
+        "damage_reduction_pct": 0.25,
+        "duration_seconds": 20,
+        "cooldown_seconds": [50, 40, 30],
+        "mana_cost": [75, 100, 125],
+        "cast_range": 600,
+        "notes": "Gana velocidad de ataque masiva contra una unidad fija pero reduce su daño de ataque un 25%. Puede moverse mientras ataca.",
+        "aghanim_scepter": {
+          "enabled": true,
+          "description": "Los ataques otorgan Viento de Cola indevisable por 3.5s."
+        },
+        "aghanim_shard": {
+          "enabled": true,
+          "description": "Otorga Fuerza del Vendaval (Gale Force): Invocación vectorizada que empuja enemigos en un área de 900 de radio. CD: 25s, Maná: 125."
+        }
+      }
+    }
+  ],
+  "talent_tree": {
+    "level_10": {
+      "left": "+0.75 s de duración para Correvientos",
+      "right": "+1 s de ralentización para Disparo Potenciado"
+    },
+    "level_15": {
+      "left": "-15 % de reducción para Disparo Potenciado",
+      "right": "+40 de velocidad de movimiento máxima para Viento de Cola"
+    },
+    "level_20": {
+      "left": "-10 % de reducción de daño para Fuego Concentrado",
+      "right": "+0.75 s de duración para Disparo Encadenador"
+    },
+    "level_25": {
+      "left": "Las víctimas de Fuego Concentrado adelantan la recarga 16 s",
+      "right": "Disparo Potenciado ejecuta a los héroes enemigos con menos de un 16 % de vida máxima"
+    }
+  },
+  "disruptive_mechanics": [
+    "Rango de ataque base de 600 que le permite acosar y tradear a distancia con extrema efectividad.",
+    "Correvientos le otorga invulnerabilidad a intercambios de golpes físicos (100% evasión).",
+    "Disparo Potenciado destruye árboles en una línea de 3000 unidades, eliminando coberturas estratégicas de héroes enemigos."
+  ],
+  "item_builds": {
+    "pos_1": {
+      "source": "dota2protracker.com, parche actual, consultado 05-08-2026",
+      "items": [
+        {"item_id": "power_treads", "pick_rate_pct": 100},
+        {"item_id": "maelstrom", "pick_rate_pct": 83},
+        {"item_id": "dragon_lance", "pick_rate_pct": 80},
+        {"item_id": "black_king_bar", "pick_rate_pct": 76},
+        {"item_id": "mjollnir", "pick_rate_pct": 73},
+        {"item_id": "null_talisman", "pick_rate_pct": 71},
+        {"item_id": "bracer", "pick_rate_pct": 53},
+        {"item_id": "crystalys", "pick_rate_pct": 49},
+        {"item_id": "daedalus", "pick_rate_pct": 37},
+        {"item_id": "hurricane_pike", "pick_rate_pct": 34},
+        {"item_id": "hydras_breath", "pick_rate_pct": 29},
+        {"item_id": "satanic", "pick_rate_pct": 27},
+        {"item_id": "falcon_blade", "pick_rate_pct": 22},
+        {"item_id": "manta_style", "pick_rate_pct": 20},
+        {"item_id": "blink_dagger", "pick_rate_pct": 20},
+        {"item_id": "linkens_sphere", "pick_rate_pct": 17}
+      ]
+    }
+  }
+}

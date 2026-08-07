@@ -1,0 +1,169 @@
+{
+  "hero_id": "juggernaut",
+  "name": "Juggernaut",
+  "role": "Posición 1 (Carry)",
+  "primary_attribute": "agi",
+  "attack_type": "Melee",
+  "base_stats": {
+    "str_base": 20,
+    "str_gain": 2.0,
+    "agi_base": 32,
+    "agi_gain": 2.8,
+    "int_base": 14,
+    "int_gain": 1.4,
+    "attack_damage_min": 54,
+    "attack_damage_max": 56,
+    "armor_lvl1": 5.5,
+    "move_speed": 305,
+    "turn_rate": 0.6,
+    "projectile_speed": 900,
+    "vision_daytime": 1800,
+    "vision_nighttime": 800,
+    "bat": 1.4,
+    "attack_speed_lvl1": 143,
+    "attack_range": 150,
+    "hp_lvl1": 560,
+    "hp_regen_lvl1": 2.50,
+    "mana_lvl1": 243,
+    "mana_regen_lvl1": 0.70
+  },
+  "defenses_lvl1": {
+    "physical_resistance_pct": 0.25,
+    "magic_resistance_pct": 0.26
+  },
+  "innate_ability": {
+    "name": "Forma de la Hoja",
+    "english_name": "Bladeform",
+    "behavior": "Pasiva",
+    "is_breakable": true,
+    "break_behavior": "Neutralizable por Ruptura: Sí",
+    "mechanics": {
+      "max_stacks": 10,
+      "agi_per_stack_pct": 0.026,
+      "move_speed_per_stack_pct": 0.01,
+      "persistence_duration_seconds": 2,
+      "notes": "Juggernaut obtiene una acumulación cada 2 s sin recibir daño, otorgando agilidad base y velocidad de movimiento."
+    }
+  },
+  "skills": [
+    {
+      "ability_name": "Furia de la Hoja",
+      "english_name": "Blade Fury",
+      "behavior": "Sin objetivo",
+      "damage_type": "Mágico",
+      "bkbs_immunity_pierce": false,
+      "dispellable": false,
+      "dispellable_behavior": "No puede disiparse",
+      "mechanics": {
+        "damage_per_second": [85, 115, 145, 175],
+        "damage_interval": 0.2,
+        "radius": 260,
+        "duration_seconds": 5,
+        "magic_resistance_pct": 0.80,
+        "cooldown_seconds": [30, 26, 22, 18],
+        "mana_cost": 110,
+        "notes": "Provoca un torbellino destructivo que lo hace inmune a efectos negativos, con 80 % de resistencia a la magia, aplicando una disipación fuerte al terminar."
+      }
+    },
+    {
+      "ability_name": "Guardián Sanador",
+      "english_name": "Healing Ward",
+      "behavior": "Punto objetivo",
+      "damage_type": "Ninguno",
+      "bkbs_immunity_pierce": true,
+      "dispellable": false,
+      "mechanics": {
+        "duration_seconds": [18, 20, 22, 24],
+        "heal_pct_per_second": [0.02, 0.03, 0.04, 0.05],
+        "radius": 400,
+        "movement_speed": 325,
+        "attacks_to_destroy": 1,
+        "cooldown_seconds": 60,
+        "mana_cost": 350,
+        "aghanim_shard_upgrade": {
+          "heal_pct_per_second": [0.035, 0.045, 0.055, 0.065],
+          "attacks_to_destroy": 2,
+          "notes": "Aumenta la curación, la vida y los ataques necesarios para destruir el Guardián Sanador."
+        },
+        "notes": "Invoca un Guardián Sanador que cura a todas las unidades aliadas cercanas según su vida máxima y puede moverse."
+      }
+    },
+    {
+      "ability_name": "Danza de la Hoja",
+      "english_name": "Blade Dance",
+      "behavior": "Pasiva",
+      "is_breakable": true,
+      "break_behavior": "Neutralizable por Ruptura: Sí",
+      "mechanics": {
+        "crit_chance_pct": 0.35,
+        "crit_damage_pct": [1.40, 1.60, 1.80, 2.00],
+        "notes": "Otorgada por Danza de la Hoja. Otorga a Juggernaut una probabilidad de infligir daño crítico con Furia de Hoja y en cada ataque."
+      }
+    },
+    {
+      "ability_name": "Omnicorte",
+      "english_name": "Omnislash",
+      "behavior": "Unidad objetivo",
+      "damage_type": "Físico",
+      "bkbs_immunity_pierce": true,
+      "dispellable": false,
+      "dispellable_behavior": "No puede disiparse",
+      "mechanics": {
+        "slash_rate_multiplier": 1.4,
+        "bonus_damage": [25, 30, 35],
+        "bonus_attack_speed": 40,
+        "duration_seconds": [3, 3.25, 3.5],
+        "jump_radius": 425,
+        "cooldown_seconds": 120,
+        "mana_cost": 450,
+        "aghanim_scepter_upgrade": {
+          "ability_name": "Minicorte",
+          "english_name": "Swiftslash",
+          "duration_seconds": 1,
+          "cooldown_seconds": 25,
+          "notes": "Añade Minicorte: realiza un breve Omnicorte durante 1 s."
+        },
+        "notes": "Juggernaut se abalanza sobre las unidades enemigas para acuchillar a su objetivo y otras cercanas a mayor frecuencia de ataque, volviéndose invulnerable."
+      }
+    }
+  ],
+  "talent_tree": {
+    "level_10": {
+      "left": "-1 s de intervalo de ganancia de acumulaciones para Forma de la Hoja",
+      "right": "-12 s de tiempo de recarga para Guardián Sanador"
+    },
+    "level_15": {
+      "left": "45 de vel. de mov. durante Furia de la Hoja",
+      "right": "-15 s de tiempo de recarga para Omnilátigo"
+    },
+    "level_20": {
+      "left": "+120 de DPS para Furia de la Hoja",
+      "right": "+15 % de daño crítico para Danza de la Hoja"
+    },
+    "level_25": {
+      "left": "+40 % de robo de vida para Danza de la Hoja",
+      "right": "+1 s de duración para Omnicorte"
+    }
+  },
+  "item_builds": {
+    "pos_1": {
+      "source": "dota2protracker.com, parche actual, consultado 05-08-2026",
+      "items": [
+        {"item_id": "power_treads", "pick_rate_pct": 97},
+        {"item_id": "battle_fury", "pick_rate_pct": 95},
+        {"item_id": "manta_style", "pick_rate_pct": 95},
+        {"item_id": "butterfly", "pick_rate_pct": 62},
+        {"item_id": "blink_dagger", "pick_rate_pct": 62},
+        {"item_id": "swift_blink", "pick_rate_pct": 51},
+        {"item_id": "eye_of_skadi", "pick_rate_pct": 51},
+        {"item_id": "aghanims_scepter", "pick_rate_pct": 36},
+        {"item_id": "wraith_band", "pick_rate_pct": 18},
+        {"item_id": "diffusal_blade", "pick_rate_pct": 15},
+        {"item_id": "disperser", "pick_rate_pct": 15},
+        {"item_id": "monkey_king_bar", "pick_rate_pct": 13},
+        {"item_id": "nullifier", "pick_rate_pct": 13},
+        {"item_id": "abyssal_blade", "pick_rate_pct": 10}
+      ]
+    }
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "hero_id": "sven",
+  "name": "Sven",
+  "role": "Posición 1 (Carry)",
+  "primary_attribute": "str",
+  "attack_type": "Melee",
+  "base_stats": {
+    "str_base": 24,
+    "str_gain": 3.5,
+    "agi_base": 18,
+    "agi_gain": 2.2,
+    "int_base": 16,
+    "int_gain": 1.5,
+    "attack_damage_min": 61,
+    "attack_damage_max": 63,
+    "armor_lvl1": 3.0,
+    "move_speed": 325,
+    "turn_rate": 0.6,
+    "projectile_speed": 900,
+    "vision_daytime": 1800,
+    "vision_nighttime": 800,
+    "bat": 1.7,
+    "attack_speed_lvl1": 128,
+    "attack_range": 150,
+    "hp_lvl1": 648,
+    "hp_regen_lvl1": 3.15,
+    "mana_lvl1": 267,
+    "mana_regen_lvl1": 0.80
+  },
+  "defenses_lvl1": {
+    "physical_resistance_pct": 0.15,
+    "magic_resistance_pct": 0.27
+  },
+  "innate_ability": {
+    "name": "Ira de Dios",
+    "english_name": "Wrath of God",
+    "behavior": "Pasiva",
+    "is_breakable": true,
+    "break_behavior": "Neutralizable por Ruptura: Sí",
+    "mechanics": {
+      "damage_per_strength": [0.1, 0.08],
+      "current_damage_bonus": 2.4,
+      "notes": "Sven obtiene daño de ataque adicional por Fuerza."
+    }
+  },
+  "skills": [
+    {
+      "ability_name": "Martillo de la Tormenta",
+      "english_name": "Storm Hammer",
+      "behavior": "Unidad objetivo",
+      "damage_type": "Mágico",
+      "bkbs_immunity_pierce": false,
+      "dispellable": true,
+      "dispellable_behavior": "Solo disipaciones fuertes",
+      "mechanics": {
+        "stun_duration_seconds": [1, 1.25, 1.5, 1.75],
+        "radius": [250, 270, 290, 310],
+        "damage": [80, 160, 240, 320],
+        "cooldown_seconds": [21, 18, 15, 12],
+        "mana_cost": 110,
+        "cast_range": 600,
+        "aghanim_scepter_upgrade": {
+          "bonus_damage": 180,
+          "notes": "Aumenta el alcance, aplica una disipación básica sobre el objetivo y afecta a unidades invulnerables. El lanzamiento alternativo hace que Sven viaje junto con el martillo."
+        },
+        "notes": "Sven libera su guantelete mágico que causa daño y aturde a las unidades enemigas en una pequeña área alrededor del objetivo."
+      }
+    },
+    {
+      "ability_name": "Gran Hendidura",
+      "english_name": "Great Cleave",
+      "behavior": "Pasiva",
+      "is_breakable": true,
+      "break_behavior": "Neutralizable por Ruptura: Sí",
+      "mechanics": {
+        "cleave_distance": [400, 500, 600, 700],
+        "cleave_damage_pct": [0.60, 0.70, 0.80, 0.90],
+        "notes": "Sven golpea con gran fuerza y alcanza a todas las unidades enemigas cercanas con su ataque."
+      }
+    },
+    {
+      "ability_name": "Grito de Guerra",
+      "english_name": "Warcry",
+      "behavior": "Sin objetivo",
+      "damage_type": "Ninguno",
+      "bkbs_immunity_pierce": true,
+      "dispellable": true,
+      "dispellable_behavior": "Sí",
+      "mechanics": {
+        "duration_seconds": 8,
+        "movement_speed_bonus_pct": [0.06, 0.09, 0.12, 0.15],
+        "armor_bonus": [5, 8, 11, 14],
+        "radius": 700,
+        "cooldown_seconds": [36, 32, 28, 24],
+        "mana_cost": [30, 35, 40, 45],
+        "aghanim_shard_upgrade": {
+          "radius": 900,
+          "movement_speed_bonus_pct": [0.09, 0.12, 0.15, 0.18],
+          "physical_barrier": 300,
+          "notes": "Aumenta el radio y la velocidad de movimiento. Grito de Guerra no se puede disipar y proporciona una barrera de 300 contra daño físico."
+        },
+        "notes": "Anima a los héroes aliados a combatir aumentando su armadura y velocidad de movimiento."
+      }
+    },
+    {
+      "ability_name": "Fuerza Divina",
+      "english_name": "God's Strength",
+      "behavior": "Sin objetivo",
+      "damage_type": "Ninguno",
+      "bkbs_immunity_pierce": false,
+      "dispellable": false,
+      "dispellable_behavior": "No puede disiparse",
+      "mechanics": {
+        "duration_seconds": 30,
+        "bonus_damage_pct": [1.10, 1.50, 1.90],
+        "slow_resistance_pct": 0.40,
+        "cooldown_seconds": [110, 105, 100],
+        "mana_cost": [100, 125, 150],
+        "notes": "Sven canaliza su fuerza interior, obteniendo daño adicional basado en su daño base y atributo principal, además de resistencia a la ralentización."
+      }
+    }
+  ],
+  "talent_tree": {
+    "level_10": {
+      "left": "+20 % de resist. a la ralent. para Fuerza Divina",
+      "right": "+5 s de duración para Grito de Guerra"
+    },
+    "level_15": {
+      "left": "+25 % de daño para Gran Hendidura",
+      "right": "-12 s de tiempo de recarga para Fuerza Divina"
+    },
+    "level_20": {
+      "left": "+8 de armadura para Grito de Guerra",
+      "right": "-25 % de t. de recarga y coste de maná para Martillo de la Tormenta"
+    },
+    "level_25": {
+      "left": "+1 s de aturdimiento para Martillo de la Tormenta",
+      "right": "+50 % de daño para Fuerza Divina"
+    }
+  },
+  "item_builds": {
+    "pos_1": {
+      "source": "dota2protracker.com, parche actual, consultado 05-08-2026",
+      "items": [
+        {"item_id": "power_treads", "pick_rate_pct": 100},
+        {"item_id": "echo_sabre", "pick_rate_pct": 100},
+        {"item_id": "mask_of_madness", "pick_rate_pct": 98},
+        {"item_id": "blink_dagger", "pick_rate_pct": 95},
+        {"item_id": "black_king_bar", "pick_rate_pct": 89},
+        {"item_id": "harpoon", "pick_rate_pct": 87},
+        {"item_id": "daedalus", "pick_rate_pct": 77},
+        {"item_id": "satanic", "pick_rate_pct": 66},
+        {"item_id": "swift_blink", "pick_rate_pct": 59},
+        {"item_id": "aghanims_shard", "pick_rate_pct": 28},
+        {"item_id": "monkey_king_bar", "pick_rate_pct": 23},
+        {"item_id": "bracelet", "pick_rate_pct": 23},
+        {"item_id": "sange_and_yasha", "pick_rate_pct": 15},
+        {"item_id": "assault_cuirass", "pick_rate_pct": 11}
+      ]
+    }
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "hero_id": "lifestealer",
+  "name": "Lifestealer",
+  "role": "Posición 1 (Carry)",
+  "primary_attribute": "str",
+  "attack_type": "Melee",
+  "base_stats": {
+    "str_base": 23,
+    "str_gain": 2.4,
+    "agi_base": 15,
+    "agi_gain": 1.9,
+    "int_base": 15,
+    "int_gain": 1.8,
+    "attack_damage_min": 46,
+    "attack_damage_max": 52,
+    "armor_lvl1": 3.5,
+    "move_speed": 320,
+    "turn_rate": 0.6,
+    "projectile_speed": 900,
+    "vision_daytime": 1800,
+    "vision_nighttime": 800,
+    "bat": 1.7,
+    "attack_speed_lvl1": 139,
+    "attack_range": 150,
+    "hp_lvl1": 626,
+    "hp_regen_lvl1": 2.55,
+    "mana_lvl1": 255,
+    "mana_regen_lvl1": 0.75
+  },
+  "defenses_lvl1": {
+    "physical_resistance_pct": 0.17,
+    "magic_resistance_pct": 0.26
+  },
+  "innate_ability": {
+    "name": "Frenesí Demoniaco",
+    "english_name": "Ghoul Frenzy",
+    "behavior": "Pasiva",
+    "is_breakable": true,
+    "break_behavior": "Neutralizable por Ruptura: Sí",
+    "mechanics": {
+      "bonus_attack_speed_per_level": 4,
+      "notes": "Otorgada por Frenesí Demoniaco. Otorga a Lifestealer velocidad de ataque de forma pasiva (4 por nivel)."
+    }
+  },
+  "skills": [
+    {
+      "ability_name": "Furia",
+      "english_name": "Rage",
+      "behavior": "Sin objetivo",
+      "damage_type": "Ninguno",
+      "bkbs_immunity_pierce": false,
+      "dispellable": false,
+      "dispellable_behavior": "No puede disiparse",
+      "mechanics": {
+        "duration_seconds": [3, 4, 5, 6],
+        "magic_resistance_pct": 0.80,
+        "movement_speed_bonus_pct": [0.06, 0.09, 0.12, 0.15],
+        "cooldown_seconds": [20, 19, 18, 17],
+        "mana_cost": [80, 100, 120, 140],
+        "notes": "Desencadena una furia enloquecida que vuelve inmune a los efectos negativos, aumenta la resistencia a la magia y la velocidad de movimiento."
+      }
+    },
+    {
+      "ability_name": "Heridas Abiertas",
+      "english_name": "Open Wounds",
+      "behavior": "Unidad objetivo",
+      "damage_type": "Ninguno",
+      "bkbs_immunity_pierce": false,
+      "dispellable": true,
+      "dispellable_behavior": "Sí",
+      "mechanics": {
+        "duration_seconds": 7,
+        "damage_as_heal_pct": [0.20, 0.30, 0.40, 0.50],
+        "max_movement_slow_pct": 0.50,
+        "cooldown_seconds": [30, 25, 20, 15],
+        "mana_cost": 90,
+        "cast_range": [300, 400, 500, 600],
+        "notes": "Desgarra a una unidad enemiga, ralentizando su velocidad de movimiento (en 8 pasos distintos) y permitiendo que los aliados curen un porcentaje del daño causado."
+      }
+    },
+    {
+      "ability_name": "Festín",
+      "english_name": "Feast",
+      "behavior": "Pasiva",
+      "damage_type": "Físico",
+      "bkbs_immunity_pierce": true,
+      "dispellable": false,
+      "dispellable_behavior": "No puede disiparse",
+      "mechanics": {
+        "heal_and_damage_pct": [0.0145, 0.0205, 0.0265, 0.0325],
+        "hp_per_hero_killed": 10,
+        "hp_per_creep_killed": 1,
+        "notes": "Los ataques de Lifestealer infligen daño y curan un porcentaje de la vida máxima del objetivo, obteniendo vida máxima permanente al matar unidades."
+      }
+    },
+    {
+      "ability_name": "Infestar",
+      "english_name": "Infest",
+      "behavior": "Unidad objetivo",
+      "damage_type": "Mágico",
+      "bkbs_immunity_pierce": true,
+      "dispellable": false,
+      "dispellable_behavior": "No puede disiparse",
+      "mechanics": {
+        "radius": 700,
+        "damage": [150, 275, 400],
+        "movement_speed_bonus_pct": [0.15, 0.20, 0.25],
+        "bonus_hp": [400, 800, 1200],
+        "max_hp_regen_self_pct": [0.03, 0.04, 0.05],
+        "creep_hp_lost_per_sec_pct": [0.015, 0.0075, 0],
+        "cooldown_seconds": [80, 65, 50],
+        "mana_cost": [100, 125, 150],
+        "cast_range": 150,
+        "aghanim_scepter_upgrade": {
+          "cooldown_seconds": 20,
+          "max_hp_regen_self_pct": [0.06, 0.08, 0.10],
+          "enemy_hero_duration_seconds": 5,
+          "attack_frequency": 1,
+          "notes": "Aumenta el alcance, reduce el tiempo de recarga a 20 s y permite seleccionar a héroes enemigos temporalmente atacándolos desde dentro."
+        },
+        "aghanim_shard_upgrade": {
+          "remaining_hp_as_damage_pct": 0.30,
+          "damage_duration_seconds": 3,
+          "notes": "Consumir a un creep con Infestar empapa a los enemigos de sangre, infligiendo daño con el tiempo en función de la vida restante del huésped."
+        },
+        "notes": "Infesta el cuerpo de una unidad objetivo permaneciendo indetectable, regenerando vida y pudiendo explotar para dañar a los enemigos."
+      }
+    }
+  ],
+  "talent_tree": {
+    "level_10": {
+      "left": "+20 de velocidad de movimiento",
+      "right": "+4 de todos los atributos"
+    },
+    "level_15": {
+      "left": "50 de velocidad de ataque en el objetivo de Heridas Abiertas",
+      "right": "+175 de daño para Infestar"
+    },
+    "level_20": {
+      "left": "+25 % de robo de vida para Heridas Abiertas",
+      "right": "+12 % de vel. de mov./vida del objetivo para Infestar"
+    },
+    "level_25": {
+      "left": "+1 s de duración para Furia",
+      "right": "+1 % de curación y daño para Festín"
+    }
+  },
+  "item_builds": {
+    "pos_1": {
+      "source": "dota2protracker.com, parche actual, consultado 05-08-2026",
+      "items": [
+        {"item_id": "phase_boots", "pick_rate_pct": 98},
+        {"item_id": "radiance", "pick_rate_pct": 98},
+        {"item_id": "aghanims_scepter", "pick_rate_pct": 70},
+        {"item_id": "armlet_of_mordiggian", "pick_rate_pct": 62},
+        {"item_id": "skull_basher", "pick_rate_pct": 62},
+        {"item_id": "sange_and_yasha", "pick_rate_pct": 45},
+        {"item_id": "abyssal_blade", "pick_rate_pct": 38},
+        {"item_id": "black_king_bar", "pick_rate_pct": 30},
+        {"item_id": "eye_of_skadi", "pick_rate_pct": 23},
+        {"item_id": "manta_style", "pick_rate_pct": 23},
+        {"item_id": "monkey_king_bar", "pick_rate_pct": 17},
+        {"item_id": "nullifier", "pick_rate_pct": 13},
+        {"item_id": "assault_cuirass", "pick_rate_pct": 13},
+        {"item_id": "soul_ring", "pick_rate_pct": 11},
+        {"item_id": "silver_edge", "pick_rate_pct": 11}
+      ]
+    }
+  }
+}
