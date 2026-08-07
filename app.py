@@ -242,7 +242,7 @@ with tab1:
         st.info("💡 Consejo: Selecciona al menos un héroe enemigo para calcular.")
 
 # ==========================================
-# PESTAÑA 2: EXPLORADOR (AQUÍ ESTÁ LA MEJORA)
+# PESTAÑA 2: EXPLORADOR
 # ==========================================
 with tab2:
     st.markdown("### 🔎 Buscar Matchup Específico")
@@ -282,7 +282,6 @@ with tab2:
                         st.caption(r["analisis_mecanico_previo"])
                         st.markdown(r["razon"], unsafe_allow_html=True)
                         
-                        # --- CÓDIGO RESTAURADO Y LIMPIADO PARA MOSTRAR ÍTEMS ---
                         items_crudos = json.loads(r["recommended_items"] or "[]")
                         if items_crudos:
                             lista_items = [i.get("item_id", "").replace("item_", "").replace("_", " ").title() for i in items_crudos if isinstance(i, dict) and "item_id" in i]
@@ -333,9 +332,10 @@ with tab4:
     with col_t2:
         with st.container(border=True):
             st.markdown("#### 💀 Peligros del Meta (Counters)")
+            # SE HA ELIMINADO EL FILTRO DE POS 1 AQUÍ ABAJO
             cur.execute("""
                 SELECT e.name as "Enemigo", UPPER(m.enemy_position) as "Rol", AVG(CASE WHEN m.score_laning IS NULL THEN (m.score_midgame + m.score_lategame) / 2.0 ELSE (m.score_laning + m.score_midgame + m.score_lategame) / 3.0 END) as Promedio
-                FROM matchups m JOIN heroes e ON m.enemy_hero_id = e.hero_id WHERE m.enemy_position != 'pos1' GROUP BY m.enemy_hero_id, e.name, m.enemy_position ORDER BY Promedio ASC
+                FROM matchups m JOIN heroes e ON m.enemy_hero_id = e.hero_id GROUP BY m.enemy_hero_id, e.name, m.enemy_position ORDER BY Promedio ASC
             """)
             datos_enemigos = cur.fetchall()
             if datos_enemigos: st.dataframe([{"Enemigo": f["Enemigo"], "Rol": f["Rol"], "Daño Promedio": f"{f['Promedio']:+.2f}"} for f in datos_enemigos], use_container_width=True, hide_index=True)
