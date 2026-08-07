@@ -70,8 +70,29 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "📈 Meta Stats"
 ])
 
+# ==========================================
+# 🛠️ REGLAS LÓGICAS DE ÍTEMS
+# ==========================================
+# 1. Ítems excluyentes (Evitar 2 tipos de botas)
 EXCLUSIVE_ITEM_GROUPS = [
-    {"item_boots", "item_phase_boots", "item_power_treads", "item_arcane_boots", "item_tranquil_boots", "item_boots_of_travel", "item_boots_of_travel_2", "item_guardian_greaves"}
+    {"item_boots", "item_phase_boots", "item_power_treads", "item_arcane_boots", "item_tranquil_boots", "item_boots_of_travel", "item_boots_of_travel_2", "item_guardian_greaves",
+     "boots", "phase_boots", "power_treads", "arcane_boots", "tranquil_boots", "boots_of_travel", "boots_of_travel_2", "guardian_greaves"}
+]
+
+# 2. Fusión de Mejoras (Absorber el ítem base si la mejora está presente)
+UPGRADE_FAMILIES = [
+    {"base": ["item_basher", "basher", "item_skull_basher", "skull_basher"], "upgrades": ["item_abyssal_blade", "abyssal_blade"]},
+    {"base": ["item_blink", "blink", "item_blink_dagger", "blink_dagger"], "upgrades": ["item_swift_blink", "swift_blink", "item_overwhelming_blink", "overwhelming_blink", "item_arcane_blink", "arcane_blink"]},
+    {"base": ["item_echo_sabre", "echo_sabre"], "upgrades": ["item_harpoon", "harpoon"]},
+    {"base": ["item_maelstrom", "maelstrom"], "upgrades": ["item_mjollnir", "mjollnir", "item_gleipnir", "gleipnir"]},
+    {"base": ["item_invis_sword", "invis_sword", "item_shadow_blade", "shadow_blade"], "upgrades": ["item_silver_edge", "silver_edge"]},
+    {"base": ["item_dragon_lance", "dragon_lance", "item_force_staff", "force_staff"], "upgrades": ["item_hurricane_pike", "hurricane_pike"]},
+    {"base": ["item_diffusal_blade", "diffusal_blade"], "upgrades": ["item_disperser", "disperser"]},
+    {"base": ["item_lesser_crit", "lesser_crit", "item_crystalys", "crystalys"], "upgrades": ["item_greater_crit", "greater_crit", "item_daedalus", "daedalus", "item_bloodthorn", "bloodthorn"]},
+    {"base": ["item_yasha", "yasha"], "upgrades": ["item_manta", "manta", "item_manta_style", "manta_style", "item_sange_and_yasha", "sange_and_yasha"]},
+    {"base": ["item_sange", "sange"], "upgrades": ["item_heavens_halberd", "heavens_halberd", "item_sange_and_yasha", "sange_and_yasha", "item_kaya_and_sange", "kaya_and_sange"]},
+    {"base": ["item_orchid", "orchid", "item_orchid_malevolence", "orchid_malevolence"], "upgrades": ["item_bloodthorn", "bloodthorn"]},
+    {"base": ["item_vanguard", "vanguard"], "upgrades": ["item_crimson_guard", "crimson_guard", "item_abyssal_blade", "abyssal_blade"]}
 ]
 
 # ==========================================
@@ -151,6 +172,7 @@ with tab1:
                             with st.expander("🎒 Build Recomendada Inteligente"):
                                 item_weights = {}
                                 
+                                # 1. Asignar pesos básicos
                                 for det in rec["details"]:
                                     peso_amenaza = max(1, int(10 - det["score_global"]))
                                     for item in det["items"]:
@@ -158,11 +180,24 @@ with tab1:
                                             i_id = item["item_id"]
                                             item_weights[i_id] = item_weights.get(i_id, 0) + peso_amenaza
                                 
+                                # 2. Resolver Fusión de Mejoras (Ej: Basher -> Abyssal)
+                                for family in UPGRADE_FAMILIES:
+                                    mejoras_presentes = [upg for upg in family["upgrades"] if upg in item_weights]
+                                    bases_presentes = [b for b in family["base"] if b in item_weights]
+                                    
+                                    if mejoras_presentes and bases_presentes:
+                                        # Le pasamos todo el peso del ítem base a la mejor mejora que se haya encontrado
+                                        mejora_principal = max(mejoras_presentes, key=lambda x: item_weights[x])
+                                        for b in bases_presentes:
+                                            item_weights[mejora_principal] += item_weights[b]
+                                            del item_weights[b]
+                                
                                 if item_weights:
                                     items_ordenados = sorted(item_weights.items(), key=lambda x: x[1], reverse=True)
                                     build_final = []
                                     grupos_usados = set()
                                     
+                                    # 3. Filtrar conflictos mutuamente excluyentes (Ej: 2 botas)
                                     for i_id, peso in items_ordenados:
                                         if len(build_final) >= 6: break
                                         conflicto = False
@@ -189,7 +224,7 @@ with tab1:
                                         else: estrellas = "⭐ (Situacional)"
                                             
                                         st.markdown(f"- **{i_id.replace('item_', '').replace('_', ' ').title()}** {estrellas}")
-                                    st.caption("Pesos ajustados al nivel de amenaza.")
+                                    st.caption("Pesos ajustados. Se fusionaron los ítems base con sus mejoras respectivas.")
                                 else:
                                     st.info("Sin items registrados.")
     else:
