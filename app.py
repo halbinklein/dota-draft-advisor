@@ -1,4 +1,5 @@
 import json
+import re
 import numpy as np
 import streamlit as st
 from collections import Counter
@@ -18,7 +19,6 @@ st.set_page_config(
 # ==========================================
 st.markdown("""
 <style>
-    /* Efecto de elevación y brillo rojo en las tarjetas al pasar el mouse */
     div[data-testid="stVerticalBlockBorderWrapper"] {
         transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     }
@@ -27,19 +27,22 @@ st.markdown("""
         box-shadow: 0 8px 20px rgba(214, 54, 50, 0.25) !important;
         border-color: #d63632 !important;
     }
-    /* Hacer que las métricas (números) resalten más */
     div[data-testid="stMetricValue"] {
         font-size: 2rem !important;
         font-weight: 800 !important;
     }
-    /* Ajustar el espaciado superior para que se vea más compacto */
     .block-container {
         padding-top: 2rem !important;
+    }
+    .volatilidad-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 0.9em;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Título y Subtítulo limpios
 st.title("🛡️ Dota 2 Draft Advisor")
 st.caption("Sistema avanzado de evaluación de matchups impulsado por IA y analítica de datos. (Versión de Producción)")
 st.divider()
@@ -71,8 +74,48 @@ tab1, tab2, tab3, tab4 = st.tabs([
 ])
 
 # ==========================================
-# 🛠️ REGLAS LÓGICAS DE ÍTEMS
+# 🛠️ FUNCIONES MATEMÁTICAS Y LÓGICAS
 # ==========================================
+def calcular_indice_volatilidad(razon_text):
+    """Extrae las simulaciones del texto y calcula la Desviación Estándar (σ)"""
+    if not razon_text:
+        return 0.0, "Desconocida", "white", "⚪", ""
+        
+    sim_scores = []
+    lines = str(razon_text).split('\n')
+    clean_lines = []
+    
+    for line in lines:
+        # Eliminamos la alerta genérica vieja para poner la nuestra nueva
+        if "⚠️ ALERTA DE VOLATILIDAD" in line:
+            continue
+            
+        if "Simulación" in line:
+            # Extraer todos los números asociados a las fases
+            valores = re.findall(r"(?:Laning|Midgame|Lategame):\s*([\-\d\.]+)", line)
+            if valores:
+                promedio_sim = np.mean([float(v) for v in valores])
+                sim_scores.append(promedio_sim)
+                
+        clean_lines.append(line)
+        
+    texto_limpio = "\n".join(clean_lines).strip()
+    
+    if len(sim_scores) > 1:
+        sigma = np.std(sim_scores)
+        score_out = round(sigma, 2)
+        
+        if sigma < 1.0:
+            return score_out, "Estable", "green", "🟢", texto_limpio
+        elif sigma < 2.2:
+            return score_out, "Moderada", "yellow", "🟡", texto_limpio
+        elif sigma < 3.5:
+            return score_out, "Alta", "orange", "🟠", texto_limpio
+        else:
+            return score_out, "Extrema", "red", "🔴", texto_limpio
+            
+    return 0.0, "N/A", "white", "⚪", texto_limpio
+
 EXCLUSIVE_ITEM_GROUPS = [
     {"item_boots", "item_phase_boots", "item_power_treads", "item_arcane_boots", "item_tranquil_boots", "item_boots_of_travel", "item_boots_of_travel_2", "item_guardian_greaves",
      "boots", "phase_boots", "power_treads", "arcane_boots", "tranquil_boots", "boots_of_travel", "boots_of_travel_2", "guardian_greaves"}
@@ -147,13 +190,14 @@ with tab1:
                         global_score = (row["score_midgame"] + row["score_lategame"]) / 2.0 if is_pos1 else (row["score_laning"] + row["score_midgame"] + row["score_lategame"]) / 3.0
                         total_score += global_score
                         
-                        es_volatil = "ALERTA DE VOLATILIDAD" in (row["razon"] or "")
+                        # Nuevo cálculo de volatilidad matemática
+                        sigma, lvl, color, icon, clean_razon = calcular_indice_volatilidad(row["razon"])
                         
                         matchup_details.append({
                             "enemy_name": enemy["name"], "position": enemy["position"], "score_global": global_score,
                             "score_laning": row["score_laning"], "score_midgame": row["score_midgame"], "score_lategame": row["score_lategame"],
-                            "razon": row["razon"], "items": json.loads(row["recommended_items"] or "[]"),
-                            "es_volatil": es_volatil
+                            "sigma": sigma, "vol_lvl": lvl, "vol_color": color, "vol_icon": icon,
+                            "items": json.loads(row["recommended_items"] or "[]")
                         })
                 
                 if matchup_details:
@@ -173,9 +217,11 @@ with tab1:
                             with st.expander("📊 Ver desglose de puntajes"):
                                 for det in rec["details"]:
                                     l_str = "N/A" if det['score_laning'] is None else f"{det['score_laning']:+.1f}"
-                                    alerta_str = " ⚠️ *(Volátil)*" if det['es_volatil'] else ""
                                     
-                                    st.markdown(f"**vs {det['enemy_name']}** -> Global: `{det['score_global']:.1f}`{alerta_str}")
+                                    # Diseño del nuevo badge de volatilidad
+                                    vol_str = f" | {det['vol_icon']} Volatilidad: :{det['vol_color']}[{det['vol_lvl']} (σ: {det['sigma']})]" if det['sigma'] >= 1.0 else ""
+                                    
+                                    st.markdown(f"**vs {det['enemy_name']}** -> Global: `{det['score_global']:.1f}`{vol_str}")
                                     st.caption(f"L: {l_str} | M: {det['score_midgame']:+.1f} | L: {det['score_lategame']:+.1f}")
                                     st.markdown("---")
                                     
@@ -233,7 +279,6 @@ with tab1:
                                             else: estrellas = "⭐ (Situacional)"
                                                 
                                             st.markdown(f"- **{i_id.replace('item_', '').replace('_', ' ').title()}** {estrellas}")
-                                        st.caption("Se han omitido ítems de early-game para priorizar el impacto en late-game.")
                                     else:
                                         st.info("Sin items recomendados tras aplicar filtros.")
                                 else:
@@ -272,6 +317,9 @@ with tab2:
                 score_global = (r["score_midgame"] + r["score_lategame"]) / 2.0 if is_pos1 else (r["score_laning"] + r["score_midgame"] + r["score_lategame"]) / 3.0
                 laning_str = "N/A" if is_pos1 else f"{r['score_laning']:+.1f}"
                 
+                # Calcular volatilidad real
+                sigma, lvl, color, icon, clean_razon = calcular_indice_volatilidad(r["razon"])
+                
                 with st.container(border=True):
                     c_h, c_s, c_f = st.columns([2, 1, 2])
                     with c_h: st.markdown(f"**⚔️ vs {r['enemy_name']}**")
@@ -279,8 +327,13 @@ with tab2:
                     with c_f: st.caption(f"Fases: [L: {laning_str} | M: {r['score_midgame']:+.1f} | L: {r['score_lategame']:+.1f}]")
                     
                     with st.expander("Ver Justificación de la IA"): 
+                        
+                        # Inyectar el nuevo badge si hay volatilidad destacable
+                        if sigma >= 1.0:
+                            st.markdown(f"**Índice de Volatilidad:** {icon} :{color}[{lvl}] *(Score Matemático de Dispersión: {sigma})*")
+                            
                         st.caption(r["analisis_mecanico_previo"])
-                        st.markdown(r["razon"], unsafe_allow_html=True)
+                        st.markdown(clean_razon, unsafe_allow_html=True)
                         
                         items_crudos = json.loads(r["recommended_items"] or "[]")
                         if items_crudos:
@@ -332,7 +385,6 @@ with tab4:
     with col_t2:
         with st.container(border=True):
             st.markdown("#### 💀 Peligros del Meta (Counters)")
-            # SE HA ELIMINADO EL FILTRO DE POS 1 AQUÍ ABAJO
             cur.execute("""
                 SELECT e.name as "Enemigo", UPPER(m.enemy_position) as "Rol", AVG(CASE WHEN m.score_laning IS NULL THEN (m.score_midgame + m.score_lategame) / 2.0 ELSE (m.score_laning + m.score_midgame + m.score_lategame) / 3.0 END) as Promedio
                 FROM matchups m JOIN heroes e ON m.enemy_hero_id = e.hero_id GROUP BY m.enemy_hero_id, e.name, m.enemy_position ORDER BY Promedio ASC
