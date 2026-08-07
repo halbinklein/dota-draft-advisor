@@ -6,7 +6,6 @@ from collections import Counter
 from src.db_manager import get_connection
 from src.config import DATA_DIR
 
-# Configuración premium de la página
 st.set_page_config(
     page_title="Dota Draft Advisor", 
     page_icon="🛡️", 
@@ -14,9 +13,6 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ==========================================
-# 🎨 INYECCIÓN DE CSS (DISEÑO PREMIUM)
-# ==========================================
 st.markdown("""
 <style>
     div[data-testid="stVerticalBlockBorderWrapper"] {
@@ -33,12 +29,6 @@ st.markdown("""
     }
     .block-container {
         padding-top: 2rem !important;
-    }
-    .volatilidad-badge {
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-weight: bold;
-        font-size: 0.9em;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -74,47 +64,46 @@ tab1, tab2, tab3, tab4 = st.tabs([
 ])
 
 # ==========================================
-# 🛠️ FUNCIONES MATEMÁTICAS Y LÓGICAS
+# 🛠️ MOTOR DE VOLATILIDAD REFORZADO
 # ==========================================
 def calcular_indice_volatilidad(razon_text):
-    """Extrae las simulaciones del texto y calcula la Desviación Estándar (σ)"""
+    """Extrae las simulaciones saltándose cualquier alerta vieja en la BD"""
     if not razon_text:
         return 0.0, "Desconocida", "white", "⚪", ""
         
     sim_scores = []
-    lines = str(razon_text).split('\n')
-    clean_lines = []
     
+    # 1. Limpieza Agresiva: Borrar cualquier mención vieja de alerta
+    texto_limpio = re.sub(r'⚠️\s*ALERTA DE VOLATILIDAD.*?(?=\n|$)', '', str(razon_text), flags=re.IGNORECASE)
+    
+    # 2. Extracción blindada de números
+    lines = texto_limpio.split('\n')
     for line in lines:
-        # Eliminamos la alerta genérica vieja para poner la nuestra nueva
-        if "⚠️ ALERTA DE VOLATILIDAD" in line:
-            continue
-            
-        if "Simulación" in line:
-            # Extraer todos los números asociados a las fases
-            valores = re.findall(r"(?:Laning|Midgame|Lategame):\s*([\-\d\.]+)", line)
-            if valores:
-                promedio_sim = np.mean([float(v) for v in valores])
-                sim_scores.append(promedio_sim)
-                
-        clean_lines.append(line)
-        
-    texto_limpio = "\n".join(clean_lines).strip()
+        if "Simulación" in line or "Midgame:" in line:
+            valores = re.findall(r"[-+]?(?:\d*\.*\d+)", line) # Agarra cualquier número (positivo o negativo)
+            if len(valores) >= 2: # Esperamos al menos midgame y lategame
+                try:
+                    promedio_sim = np.mean([float(v) for v in valores[-2:]]) # Tomamos los últimos 2 números por si acaso
+                    sim_scores.append(promedio_sim)
+                except ValueError:
+                    pass
+
+    texto_final = "\n".join([line for line in lines if "ALERTA" not in line]).strip()
     
     if len(sim_scores) > 1:
         sigma = np.std(sim_scores)
         score_out = round(sigma, 2)
         
         if sigma < 1.0:
-            return score_out, "Estable", "green", "🟢", texto_limpio
+            return score_out, "Estable", "green", "🟢", texto_final
         elif sigma < 2.2:
-            return score_out, "Moderada", "yellow", "🟡", texto_limpio
+            return score_out, "Moderada", "yellow", "🟡", texto_final
         elif sigma < 3.5:
-            return score_out, "Alta", "orange", "🟠", texto_limpio
+            return score_out, "Alta", "orange", "🟠", texto_final
         else:
-            return score_out, "Extrema", "red", "🔴", texto_limpio
+            return score_out, "Extrema", "red", "🔴", texto_final
             
-    return 0.0, "N/A", "white", "⚪", texto_limpio
+    return 0.0, "N/A", "white", "⚪", texto_final
 
 EXCLUSIVE_ITEM_GROUPS = [
     {"item_boots", "item_phase_boots", "item_power_treads", "item_arcane_boots", "item_tranquil_boots", "item_boots_of_travel", "item_boots_of_travel_2", "item_guardian_greaves",
@@ -137,15 +126,9 @@ UPGRADE_FAMILIES = [
 ]
 
 SKIP_ITEMS = {
-    "item_boots", "boots", 
-    "item_phase_boots", "phase_boots", 
-    "item_power_treads", "power_treads", 
-    "item_arcane_boots", "arcane_boots", 
-    "item_tranquil_boots", "tranquil_boots",
-    "item_magic_wand", "magic_wand",
-    "item_bracer", "bracer",
-    "item_wraith_band", "wraith_band",
-    "item_null_talisman", "null_talisman"
+    "item_boots", "boots", "item_phase_boots", "phase_boots", "item_power_treads", "power_treads", 
+    "item_arcane_boots", "arcane_boots", "item_tranquil_boots", "tranquil_boots", "item_magic_wand", "magic_wand",
+    "item_bracer", "bracer", "item_wraith_band", "wraith_band", "item_null_talisman", "null_talisman"
 }
 
 # ==========================================
@@ -190,7 +173,6 @@ with tab1:
                         global_score = (row["score_midgame"] + row["score_lategame"]) / 2.0 if is_pos1 else (row["score_laning"] + row["score_midgame"] + row["score_lategame"]) / 3.0
                         total_score += global_score
                         
-                        # Nuevo cálculo de volatilidad matemática
                         sigma, lvl, color, icon, clean_razon = calcular_indice_volatilidad(row["razon"])
                         
                         matchup_details.append({
@@ -217,8 +199,6 @@ with tab1:
                             with st.expander("📊 Ver desglose de puntajes"):
                                 for det in rec["details"]:
                                     l_str = "N/A" if det['score_laning'] is None else f"{det['score_laning']:+.1f}"
-                                    
-                                    # Diseño del nuevo badge de volatilidad
                                     vol_str = f" | {det['vol_icon']} Volatilidad: :{det['vol_color']}[{det['vol_lvl']} (σ: {det['sigma']})]" if det['sigma'] >= 1.0 else ""
                                     
                                     st.markdown(f"**vs {det['enemy_name']}** -> Global: `{det['score_global']:.1f}`{vol_str}")
@@ -227,7 +207,6 @@ with tab1:
                                     
                             with st.expander("🎒 Build Recomendada Inteligente"):
                                 item_weights = {}
-                                
                                 for det in rec["details"]:
                                     peso_amenaza = max(1, int(10 - det["score_global"]))
                                     for item in det["items"]:
@@ -238,7 +217,6 @@ with tab1:
                                 for family in UPGRADE_FAMILIES:
                                     mejoras_presentes = [upg for upg in family["upgrades"] if upg in item_weights]
                                     bases_presentes = [b for b in family["base"] if b in item_weights]
-                                    
                                     if mejoras_presentes and bases_presentes:
                                         mejora_principal = max(mejoras_presentes, key=lambda x: item_weights[x])
                                         for b in bases_presentes:
@@ -251,9 +229,7 @@ with tab1:
                                     grupos_usados = set()
                                     
                                     for i_id, peso in items_ordenados:
-                                        if i_id in SKIP_ITEMS:
-                                            continue
-                                            
+                                        if i_id in SKIP_ITEMS: continue
                                         if len(build_final) >= 6: break
                                         conflicto = False
                                         grupo_index = -1
@@ -277,7 +253,6 @@ with tab1:
                                             if ratio >= 0.75: estrellas = "⭐⭐⭐ (Vital)"
                                             elif ratio >= 0.40: estrellas = "⭐⭐ (Importante)"
                                             else: estrellas = "⭐ (Situacional)"
-                                                
                                             st.markdown(f"- **{i_id.replace('item_', '').replace('_', ' ').title()}** {estrellas}")
                                     else:
                                         st.info("Sin items recomendados tras aplicar filtros.")
@@ -317,7 +292,6 @@ with tab2:
                 score_global = (r["score_midgame"] + r["score_lategame"]) / 2.0 if is_pos1 else (r["score_laning"] + r["score_midgame"] + r["score_lategame"]) / 3.0
                 laning_str = "N/A" if is_pos1 else f"{r['score_laning']:+.1f}"
                 
-                # Calcular volatilidad real
                 sigma, lvl, color, icon, clean_razon = calcular_indice_volatilidad(r["razon"])
                 
                 with st.container(border=True):
@@ -327,8 +301,6 @@ with tab2:
                     with c_f: st.caption(f"Fases: [L: {laning_str} | M: {r['score_midgame']:+.1f} | L: {r['score_lategame']:+.1f}]")
                     
                     with st.expander("Ver Justificación de la IA"): 
-                        
-                        # Inyectar el nuevo badge si hay volatilidad destacable
                         if sigma >= 1.0:
                             st.markdown(f"**Índice de Volatilidad:** {icon} :{color}[{lvl}] *(Score Matemático de Dispersión: {sigma})*")
                             
