@@ -258,45 +258,20 @@ with tab3:
             with cols[idx]:
                 with st.container(border=True): 
                     st.metric(f"#{idx+1} {hero['name']}", f"{hero['promedio']:.2f}")
-
 with tab4:
     st.markdown("### 📊 Tableros de Riesgo")
     col_t1, col_t2 = st.columns(2)
     with col_t1:
         with st.container(border=True):
             st.markdown("#### 🥇 Rendimiento General")
-            if own_hero_ids:
-                cur.execute(f"""
-                    SELECT h.name as 'Héroe', 
-                           AVG(CASE WHEN m.score_laning IS NULL THEN (m.score_midgame + m.score_lategame) / 2.0 
-                                    ELSE (m.score_laning + m.score_midgame + m.score_lategame) / 3.0 END) as Promedio 
-                    FROM heroes h 
-                    JOIN matchups m ON h.hero_id = m.own_hero_id 
-                    WHERE h.hero_id IN ({placeholders}) 
-                    GROUP BY h.hero_id, h.name 
-                    ORDER BY Promedio DESC
-                """, tuple(own_hero_ids))
-                datos_pool = cur.fetchall()
-                if datos_pool: 
-                    st.dataframe([{"Héroe": f["Héroe"], "Puntaje": f"{f['Promedio']:+.2f}"} for f in datos_pool], use_container_width=True, hide_index=True)
-
+            cur.execute("SELECT h.name as 'Héroe', AVG(CASE WHEN m.score_laning IS NULL THEN (m.score_midgame + m.score_lategame) / 2.0 ELSE (m.score_laning + m.score_midgame + m.score_lategame) / 3.0 END) as Promedio FROM heroes h JOIN matchups m ON h.hero_id = m.own_hero_id WHERE h.is_own_pool = 1 GROUP BY h.hero_id, h.name ORDER BY Promedio DESC")
+            datos_pool = cur.fetchall()
+            if datos_pool: st.dataframe([{"Héroe": f["Héroe"], "Puntaje": f"{f['Promedio']:+.2f}"} for f in datos_pool], use_container_width=True, hide_index=True)
     with col_t2:
         with st.container(border=True):
             st.markdown("#### 💀 Peligros del Meta (Counters)")
-            if own_hero_ids:
-                # También aplicamos el filtro aquí para que los peligros se midan SÓLO contra tu pool real
-                cur.execute(f"""
-                    SELECT e.name as 'Enemigo', UPPER(m.enemy_position) as 'Rol', 
-                           AVG(CASE WHEN m.score_laning IS NULL THEN (m.score_midgame + m.score_lategame) / 2.0 
-                                    ELSE (m.score_laning + m.score_midgame + m.score_lategame) / 3.0 END) as Promedio 
-                    FROM matchups m 
-                    JOIN heroes e ON m.enemy_hero_id = e.hero_id 
-                    WHERE m.own_hero_id IN ({placeholders})
-                    GROUP BY m.enemy_hero_id, e.name, m.enemy_position 
-                    ORDER BY Promedio ASC
-                """, tuple(own_hero_ids))
-                datos_enemigos = cur.fetchall()
-                if datos_enemigos: 
-                    st.dataframe([{"Enemigo": f["Enemigo"], "Rol": f["Rol"], "Daño Promedio": f"{f['Promedio']:+.2f}"} for f in datos_enemigos], use_container_width=True, hide_index=True)
+            cur.execute("SELECT e.name as 'Enemigo', UPPER(m.enemy_position) as 'Rol', AVG(CASE WHEN m.score_laning IS NULL THEN (m.score_midgame + m.score_lategame) / 2.0 ELSE (m.score_laning + m.score_midgame + m.score_lategame) / 3.0 END) as Promedio FROM matchups m JOIN heroes e ON m.enemy_hero_id = e.hero_id GROUP BY m.enemy_hero_id, e.name, m.enemy_position ORDER BY Promedio ASC")
+            datos_enemigos = cur.fetchall()
+            if datos_enemigos: st.dataframe([{"Enemigo": f["Enemigo"], "Rol": f["Rol"], "Daño Promedio": f"{f['Promedio']:+.2f}"} for f in datos_enemigos], use_container_width=True, hide_index=True)
 
 conn.close()
