@@ -1,0 +1,15 @@
+[theme]
+# El rojo característico de Dota 2
+primaryColor = "#d63632"
+
+# Fondo casi negro
+backgroundColor = "#111111"
+
+# Fondo secundario (para las tarjetas y barras laterales)
+secondaryBackgroundColor = "#1c1c1c"
+
+# Texto gris claro para que no canse la vista
+textColor = "#e0e0e0"
+
+# Tipografía moderna
+font = "sans serif"
