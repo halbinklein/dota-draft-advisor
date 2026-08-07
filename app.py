@@ -73,7 +73,7 @@ tab1, tab2, tab3, tab4 = st.tabs([
 # ==========================================
 # 🛠️ REGLAS LÓGICAS DE ÍTEMS
 # ==========================================
-# 1. Ítems excluyentes (Evitar 2 tipos de botas)
+# 1. Ítems excluyentes (Evitar 2 tipos de botas si llegaran a pasar)
 EXCLUSIVE_ITEM_GROUPS = [
     {"item_boots", "item_phase_boots", "item_power_treads", "item_arcane_boots", "item_tranquil_boots", "item_boots_of_travel", "item_boots_of_travel_2", "item_guardian_greaves",
      "boots", "phase_boots", "power_treads", "arcane_boots", "tranquil_boots", "boots_of_travel", "boots_of_travel_2", "guardian_greaves"}
@@ -94,6 +94,19 @@ UPGRADE_FAMILIES = [
     {"base": ["item_orchid", "orchid", "item_orchid_malevolence", "orchid_malevolence"], "upgrades": ["item_bloodthorn", "bloodthorn"]},
     {"base": ["item_vanguard", "vanguard"], "upgrades": ["item_crimson_guard", "crimson_guard", "item_abyssal_blade", "abyssal_blade"]}
 ]
+
+# 3. Ítems a omitir de la recomendación final (Botas básicas y consumibles obvios)
+SKIP_ITEMS = {
+    "item_boots", "boots", 
+    "item_phase_boots", "phase_boots", 
+    "item_power_treads", "power_treads", 
+    "item_arcane_boots", "arcane_boots", 
+    "item_tranquil_boots", "tranquil_boots",
+    "item_magic_wand", "magic_wand",
+    "item_bracer", "bracer",
+    "item_wraith_band", "wraith_band",
+    "item_null_talisman", "null_talisman"
+}
 
 # ==========================================
 # PESTAÑA 1: SIMULADOR DRAFT
@@ -186,7 +199,6 @@ with tab1:
                                     bases_presentes = [b for b in family["base"] if b in item_weights]
                                     
                                     if mejoras_presentes and bases_presentes:
-                                        # Le pasamos todo el peso del ítem base a la mejor mejora que se haya encontrado
                                         mejora_principal = max(mejoras_presentes, key=lambda x: item_weights[x])
                                         for b in bases_presentes:
                                             item_weights[mejora_principal] += item_weights[b]
@@ -197,8 +209,12 @@ with tab1:
                                     build_final = []
                                     grupos_usados = set()
                                     
-                                    # 3. Filtrar conflictos mutuamente excluyentes (Ej: 2 botas)
+                                    # 3. Filtrar ítems ignorados y conflictos
                                     for i_id, peso in items_ordenados:
+                                        # OMITIR BOTAS BÁSICAS AQUÍ
+                                        if i_id in SKIP_ITEMS:
+                                            continue
+                                            
                                         if len(build_final) >= 6: break
                                         conflicto = False
                                         grupo_index = -1
@@ -215,16 +231,18 @@ with tab1:
                                             if grupo_index != -1:
                                                 grupos_usados.add(grupo_index)
 
-                                    max_peso = build_final[0][1] if build_final else 1
-                                    
-                                    for i_id, peso in build_final:
-                                        ratio = peso / max_peso
-                                        if ratio >= 0.75: estrellas = "⭐⭐⭐ (Vital)"
-                                        elif ratio >= 0.40: estrellas = "⭐⭐ (Importante)"
-                                        else: estrellas = "⭐ (Situacional)"
-                                            
-                                        st.markdown(f"- **{i_id.replace('item_', '').replace('_', ' ').title()}** {estrellas}")
-                                    st.caption("Pesos ajustados. Se fusionaron los ítems base con sus mejoras respectivas.")
+                                    if build_final:
+                                        max_peso = build_final[0][1]
+                                        for i_id, peso in build_final:
+                                            ratio = peso / max_peso
+                                            if ratio >= 0.75: estrellas = "⭐⭐⭐ (Vital)"
+                                            elif ratio >= 0.40: estrellas = "⭐⭐ (Importante)"
+                                            else: estrellas = "⭐ (Situacional)"
+                                                
+                                            st.markdown(f"- **{i_id.replace('item_', '').replace('_', ' ').title()}** {estrellas}")
+                                        st.caption("Se han omitido ítems de early-game (como botas básicas) para priorizar el impacto en late-game.")
+                                    else:
+                                        st.info("Sin items recomendados tras aplicar filtros.")
                                 else:
                                     st.info("Sin items registrados.")
     else:
