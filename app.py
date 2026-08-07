@@ -235,18 +235,24 @@ with tab2:
 with tab3:
     st.markdown("### 👑 Fuerza Global de tu Pool")
     if len(own_pool_rows) >= 5:
-        heroes_list = [{"id": h["hero_id"], "name": h["name"]} for h in own_pool_rows]
-        matchup_data = {}
-        for h in heroes_list:
-            cur.execute("SELECT enemy_hero_id, CASE WHEN score_laning IS NULL THEN (score_midgame + score_lategame) / 2.0 ELSE (score_laning + score_midgame + score_lategame) / 3.0 END as score_global FROM matchups WHERE own_hero_id = ?", (h["id"],))
-            matchup_data[h["id"]] = {row["enemy_hero_id"]: row["score_global"] for row in cur.fetchall()}
-        hero_global_averages = [{"id": h["id"], "name": h["name"], "promedio": float(np.mean(list(matchup_data[h["id"]].values())) if matchup_data[h["id"]] else -999)} for h in heroes_list]
-        hero_global_averages.sort(key=lambda x: x["promedio"], reverse=True)
+        # Usamos el motor SQL para un promedio matemáticamente perfecto
+        cur.execute("""
+            SELECT h.name, 
+                   AVG(CASE WHEN m.score_laning IS NULL THEN (m.score_midgame + m.score_lategame) / 2.0 
+                            ELSE (m.score_laning + m.score_midgame + m.score_lategame) / 3.0 END) as promedio
+            FROM heroes h 
+            JOIN matchups m ON h.hero_id = m.own_hero_id 
+            WHERE h.is_own_pool = 1 
+            GROUP BY h.hero_id, h.name 
+            ORDER BY promedio DESC
+        """)
+        hero_global_averages = cur.fetchall()
+        
         cols = st.columns(5)
         for idx, hero in enumerate(hero_global_averages[:5]):
             with cols[idx]:
-                with st.container(border=True): st.metric(f"#{idx+1} {hero['name']}", f"{hero['promedio']:.2f}")
-
+                with st.container(border=True): 
+                    st.metric(f"#{idx+1} {hero['name']}", f"{hero['promedio']:.2f}")
 with tab4:
     st.markdown("### 📊 Tableros de Riesgo")
     col_t1, col_t2 = st.columns(2)
